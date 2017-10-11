@@ -64,7 +64,16 @@ if [ -f /etc/redhat-release ]; then
 fi
 
 if [ -f /etc/lsb-release ]; then
-    if [[ `/sbin/init --version` =~ upstart ]]; then
+    #in ubuntu16.04.3LTS,[/sbin/init] has no option with [version]
+	echo "test /sbin/init --version"
+	/sbin/init --version
+	if [ "$?" -eq "0" ]; then
+      mongodb_service_upstart="/sbin/init --version"
+    else
+      mongodb_service_upstart="systemd --version"
+    fi
+	#check upstart
+    if [[ `${mongodb_service_upstart}` =~ upstart ]]; then
         restart mongod || echo "mongodb upstart job does not exist"
     else
         systemctl restart mongod || echo "mongodb systemctl job does not exist"
